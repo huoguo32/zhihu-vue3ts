@@ -1,14 +1,24 @@
 <template>
   <div class="container"></div>
   <GlobalHeader :user="currentUser"></GlobalHeader>
-  <ColumnList :list="list">asdsadsadasd</ColumnList>
+  <ColumnList :list="list"></ColumnList>
+  <form action="">
+    <div class="mb-3">
+      <label class="form-label">邮箱地址</label>
+      <ValidateInput :rules="emailRules" v-model="emailVal">{{emailVal}}</ValidateInput>
+    </div>
+  </form>
 </template>
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, reactive, ref } from 'vue'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import ColumnList, { ColumnProps } from './components/ColumnList.vue'
 import GlobalHeader, { UserProps } from './components/GlobalHeader.vue'
+import ValidateInput, { RulesProp } from './components/ValidateInput.vue'
 const currentUser: UserProps = { isLogin: true, nickName: 'huoguo32' }
+const emailReg =
+/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
+
 const testData: ColumnProps[] = [
   {
     id: 1,
@@ -28,13 +38,21 @@ export default defineComponent({
   name: 'App',
   components: {
     ColumnList,
-    GlobalHeader
+    GlobalHeader,
+    ValidateInput
   },
   setup (props, content) {
-    // const columnList = reactive(testData)
+    const emailVal = ref('viking')
+    const emailRules: RulesProp = [
+      { type: 'required', message: '邮箱不能为空' },
+      { type: 'email', message: '邮箱格式不正确' }
+    ]
     return {
       list: testData,
-      currentUser
+      currentUser,
+      emailRules,
+      emailVal
+
     }
   }
 })
