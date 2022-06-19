@@ -1,38 +1,37 @@
 <template>
   <div class="validate-input-container pb-3">
     <input
+      v-if="tag !== 'textarea'"
       class="form-control"
-      :class="{ 'is-invalid': inputRef.error }"
+      :class="{'is-invalid': inputRef.error}"
       @blur="validateInput"
-      :value="inputRef.val"
+      v-model="inputRef.val"
       v-bind="$attrs"
-      @input="updateValue"
-    />
+    >
     <textarea
+      v-else
       class="form-control"
-      :class="{ 'is-invalid': inputRef.message }"
+      :class="{'is-invalid': inputRef.error}"
       @blur="validateInput"
       v-model="inputRef.val"
       v-bind="$attrs"
     >
     </textarea>
-    <span v-if="inputRef.error" class="invalid-feedback">{{
-      inputRef.message
-    }}</span>
+    <span v-if="inputRef.error" class="invalid-feedback">{{inputRef.message}}</span>
   </div>
 </template>
 
-<script lang='ts'>
-import { reactive, toRefs, onBeforeMount, onMounted, defineComponent, ref, PropType } from 'vue'
-const emailReg =
-/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
-interface RuleProp{
-    type: 'required' | 'email';
-    message: string;
+<script lang="ts">
+import { defineComponent, reactive, PropType, onMounted, computed } from 'vue'
+import { emitter } from './ValidateForm.vue'
+const emailReg = /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
+interface RuleProp {
+  type: 'required' | 'email' | 'custom';
+  message: string;
+  validator?: () => boolean;
 }
+export type RulesProp = RuleProp[]
 export type TagType = 'input' | 'textarea'
-
-export type RulesProp = RuleProp[];
 export default defineComponent({
   props: {
     rules: Array as PropType<RulesProp>,
@@ -41,19 +40,19 @@ export default defineComponent({
       type: String as PropType<TagType>,
       default: 'input'
     }
-
   },
+  inheritAttrs: false,
   setup (props, context) {
     const inputRef = reactive({
-      val: props.modelValue || '',
+      val: computed({
+        get: () => props.modelValue || '',
+        set: val => {
+          context.emit('update:modelValue', val)
+        }
+      }),
       error: false,
       message: ''
     })
-    const unpdateValue = (e: any) => {
-      const targetValue = (e.target as HTMLInputElement).value
-      inputRef.val = targetValue
-      context.emit('update:modelValue', targetValue)
-    }
     const validateInput = () => {
       if (props.rules) {
         const allPassed = props.rules.every(rule => {
@@ -66,9 +65,9 @@ export default defineComponent({
             case 'email':
               passed = emailReg.test(inputRef.val)
               break
-            // case 'custom':
-            //   passed = rule.validator ? rule.validator() : true
-            //   break
+            case 'custom':
+              passed = rule.validator ? rule.validator() : true
+              break
             default:
               break
           }
@@ -79,16 +78,13 @@ export default defineComponent({
       }
       return true
     }
+    onMounted(() => {
+      emitter.emit('form-item-created', validateInput)
+    })
     return {
       inputRef,
-      validateInput,
-      unpdateValue
-
+      validateInput
     }
   }
 })
-
 </script>
-<style lang="scss" scoped>
-
-</style>

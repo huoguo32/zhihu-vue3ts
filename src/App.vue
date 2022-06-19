@@ -2,12 +2,21 @@
   <div class="container"></div>
   <GlobalHeader :user="currentUser"></GlobalHeader>
   <ColumnList :list="list"></ColumnList>
-  <form action="">
+  <ValidateForm action="" @form-submit="onFormSubmit">
     <div class="mb-3">
       <label class="form-label">邮箱地址</label>
-      <ValidateInput :rules="emailRules" v-model="emailVal">{{emailVal}}</ValidateInput>
+      <ValidateInput :rules="emailRules" v-model="emailVal" placeholder="请输入邮箱地址" type="text" ref="inputRef">{{emailVal}} placeh</ValidateInput>
     </div>
-  </form>
+    <div class="mb-3">
+      <label class="form-label">密码</label>
+      <ValidateInput :rules="emailRules" v-model="emailVal" placeholder="请输入密码" type="password">{{emailVal}} placeh</ValidateInput>
+    </div>
+    <template #submit>
+      <span class="btn btn-danger">
+        sunbmit
+      </span>
+    </template>
+  </ValidateForm>
 </template>
 <script lang="ts">
 import { defineComponent, reactive, ref } from 'vue'
@@ -15,6 +24,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import ColumnList, { ColumnProps } from './components/ColumnList.vue'
 import GlobalHeader, { UserProps } from './components/GlobalHeader.vue'
 import ValidateInput, { RulesProp } from './components/ValidateInput.vue'
+import ValidateForm from './components/ValidateForm.vue'
 const currentUser: UserProps = { isLogin: true, nickName: 'huoguo32' }
 const emailReg =
 /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
@@ -39,19 +49,27 @@ export default defineComponent({
   components: {
     ColumnList,
     GlobalHeader,
-    ValidateInput
+    ValidateInput,
+    ValidateForm
   },
   setup (props, content) {
-    const emailVal = ref('viking')
+    const inputRef = ref<any>()
+    const emailVal = ref('123@test.com')
     const emailRules: RulesProp = [
       { type: 'required', message: '邮箱不能为空' },
       { type: 'email', message: '邮箱格式不正确' }
     ]
+    const onFormSubmit = (result: boolean) => {
+      console.log(inputRef.value.validateInput())
+      console.log(result)
+    }
     return {
       list: testData,
       currentUser,
       emailRules,
-      emailVal
+      emailVal,
+      onFormSubmit,
+      inputRef
 
     }
   }
