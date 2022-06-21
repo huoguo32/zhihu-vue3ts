@@ -46,10 +46,10 @@ const testData: ColumnProps[] = [
 export default defineComponent({
   name: 'App',
   components: {
-    ColumnList,
-    GlobalHeader,
-    ValidateInput,
-    ValidateForm
+    // ColumnList,
+    GlobalHeader
+    // ValidateInput,
+    // ValidateForm
   },
   setup (props, content) {
     const inputRef = ref<any>()
@@ -59,8 +59,8 @@ export default defineComponent({
       { type: 'email', message: '邮箱格式不正确' }
     ]
     const onFormSubmit = (result: boolean) => {
-      console.log(inputRef.value.validateInput())
-      console.log(result)
+      // console.log(inputRef.value.validateInput())
+      // console.log(result)
     }
     return {
       list: testData,
